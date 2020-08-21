@@ -3,6 +3,7 @@
 #include <string>
 #include <math.h>
 #include "tower.h"
+#include "cursor.h"
 
 
 void explode(sf::RenderWindow* window) {
@@ -43,27 +44,22 @@ int main(void) {
   cursor.setTexture(cursorSkin);
   cursor.setPosition(10, 10);*/
 
-  sf::RectangleShape cursor[2];
+
+  //cursor original
+  
+  /*sf::RectangleShape cursor[2];
   cursor[0].setSize(sf::Vector2f(11, 1));
   cursor[0].setOrigin(6,0);
   cursor[0].rotate(45);
   
   cursor[1].setSize(sf::Vector2f(11, 1));
   cursor[1].rotate(135);
-  cursor[1].setOrigin(5, 0);
+  cursor[1].setOrigin(5, 0);*/
 
-  sf::RectangleShape target[2];
-  for(int i = 0; i < 2; i++) {
-	target[i].setOutlineColor(sf::Color(255, 0, 0));
-	target[i].setFillColor(sf::Color(255, 0, 0));
-  }
-  target[0].setSize(sf::Vector2f(11, 1));
-  target[0].setOrigin(6,0);
-  target[0].rotate(45);
-  
-  target[1].setSize(sf::Vector2f(11, 1));
-  target[1].rotate(135);
-  target[1].setOrigin(5, 0);
+  Cursor cursor;
+
+  Cursor target;
+  target.setColor(sf::Color(255, 0, 0));
   
   Tower tower[3];
 
@@ -77,14 +73,16 @@ int main(void) {
   ground[0].position = sf::Vector2f(800, 541);
   ground[0].color = sf::Color(255, 255, 255);*/
 
-  sf::RectangleShape ground(sf::Vector2f(800, 1));
-  ground.setOutlineColor(sf::Color(255, 255, 255));
-  ground.setPosition(0, 563);
+  sf::VertexArray ground(sf::LineStrip, 2);
+  ground[0].position = sf::Vector2f(0, 564);
+  ground[0].color = sf::Color(255, 255, 255);
+  ground[1].position = sf::Vector2f(800, 564);
+  ground[1].color = sf::Color(255, 255, 255);
 
   sf::RectangleShape bullet[3];
-  bullet[0].setPosition(56, 538);
-  bullet[1].setPosition(400, 538);
-  bullet[2].setPosition(744, 538);
+  bullet[0].setPosition(56.5, 538);
+  bullet[1].setPosition(400.5, 538);
+  bullet[2].setPosition(744.5, 538);
   for(int i = 0; i < 3; i++) {
 	bullet[i].setOutlineColor(sf::Color(255, 255, 255));
   }
@@ -94,9 +92,13 @@ int main(void) {
 
 	int mouseX = mouse.getPosition(window).x;
 	int mouseY = mouse.getPosition(window).y;
+
+
+	// cursor original
 	
-	cursor[0].setPosition(mouseX, mouseY);
-	cursor[1].setPosition(mouseX, mouseY);
+	/*cursor[0].setPosition(mouseX, mouseY);
+	  cursor[1].setPosition(mouseX, mouseY);*/
+	cursor.setPosition(mouseX, mouseY);
 
 	if(window.getSize() != sf::Vector2u(800, 600)) {
 	  window.setSize(sf::Vector2u(800, 600));
@@ -174,21 +176,23 @@ int main(void) {
 	window.draw(tower[1].getSprite());
 	window.draw(tower[2].getSprite());
 
-	window.draw(cursor[0]);
-	window.draw(cursor[1]);
+	/*window.draw(cursor[0]);
+	  window.draw(cursor[1]);*/
+	sf::VertexArray cursorRender1 = cursor.getline1();
+	sf::VertexArray cursorRender2 = cursor.getline2();
+	window.draw(cursorRender1);
+	window.draw(cursorRender2);
 	
 	for(int i = 0; i < (sizeof(tower)/sizeof(tower[0])); i++) {
 	  if(tower[i].hastarget()) {
-		target[0].setPosition(tower[i].getTarget().x,
-							  tower[i].getTarget().y);
-	    target[1].setPosition(tower[i].getTarget().x,
-							  tower[i].getTarget().y);
-		window.draw(target[0]);
-		window.draw(target[1]);
+		target.setPosition(tower[i].getTarget().x,
+						   tower[i].getTarget().y);
+		window.draw(target.getline1());
+		window.draw(target.getline2());
 
 		if(bullet[i].getSize().x >= distance(sf::Vector2f(tower[i].getPosition()),
 											 sf::Vector2f(tower[i].getTarget()))) {
-		  explosion
+		  //explosion
 		  tower[i].removeTarget();
 		}
 		
@@ -196,9 +200,9 @@ int main(void) {
 		bullet[i].setOrigin(bullet[i].getSize().x, 0);
 
 		window.draw(bullet[i]);
+		
 	  }
 	}
-	
 	window.display();
   }
   
