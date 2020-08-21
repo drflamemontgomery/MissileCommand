@@ -6,6 +6,7 @@
 #include "tower.h"
 #include "cursor.h"
 #include "explosion.h"
+#include "bullet.h"
 
 void explode(sf::RenderWindow* window) {
   
@@ -21,8 +22,16 @@ float distance(sf::Vector2f point1, sf::Vector2f point2) {
 float angle(sf::Vector2f point1, sf::Vector2f point2) {
   float adjacent = point1.x - point2.x;
   float opposite = point1.y - point2.y;
+
+  std::cout << "angle: "<< atan2(opposite, adjacent) << std::endl;
+  return atan2(opposite, adjacent);// * 180/3.14159265);
+}
+
+sf::Vector2f polarToCart(float angle, float radius) {
+  float x = cos(angle)*radius;
+  float y = sin(angle)*radius;
   
-  return (atan2(opposite, adjacent) * 180/3.14159265);
+  return sf::Vector2f(x, y);
 }
 
 int main(void) {
@@ -54,13 +63,10 @@ int main(void) {
   ground[1].position = sf::Vector2f(800, 564);
   ground[1].color = sf::Color(255, 255, 255);
 
-  sf::RectangleShape bullet[3];
-  bullet[0].setPosition(56.5, 538);
-  bullet[1].setPosition(400.5, 538);
-  bullet[2].setPosition(744.5, 538);
-  for(int i = 0; i < 3; i++) {
-	bullet[i].setOutlineColor(sf::Color(255, 255, 255));
-  }
+  Bullet bullet[3];
+  bullet[0].setPosition(56, 538);
+  bullet[1].setPosition(400, 538);
+  bullet[2].setPosition(744, 538);
 
   std::vector<Explosion> explosions;
   
@@ -89,13 +95,13 @@ int main(void) {
 	  if(event.type == sf::Event::MouseButtonReleased) {
 		if(event.mouseButton.button == sf::Mouse::Left) {
 		  float dst[3];
-		  dst[0] = distance(sf::Vector2f(bullet[0].getPosition()),
+		  dst[0] = distance(bullet[0].getPosition(),
 							sf::Vector2f(mouse.getPosition(window).x,
 										 mouse.getPosition(window).y));
-		  dst[1] = distance(sf::Vector2f(bullet[1].getPosition()),
+		  dst[1] = distance(bullet[1].getPosition(),
 							sf::Vector2f(mouse.getPosition(window).x,
 										 mouse.getPosition(window).y));
-		  dst[2] = distance(sf::Vector2f(bullet[2].getPosition()),
+		  dst[2] = distance(bullet[2].getPosition(),
 							sf::Vector2f(mouse.getPosition(window).x,
 										 mouse.getPosition(window).y));
 		  
@@ -105,37 +111,27 @@ int main(void) {
 			
 			tower[0].setTarget(mouse.getPosition(window).x,
 							   mouse.getPosition(window).y);
-			bullet[0].setSize(sf::Vector2f(1, 1));
-			bullet[0].setOrigin(1, 0);
-			bullet[0].setRotation(0);
-			bullet[0].rotate(angle(sf::Vector2f(bullet[0].getPosition()),
-								   sf::Vector2f(mouse.getPosition(window).x,
-												mouse.getPosition(window).y)));
-			
+			bullet[0].setRadius(0);
+			bullet[0].setAngle(angle(bullet[0].getPosition(),
+									 sf::Vector2f(tower[0].getTarget())));
+		    
 		  }
 		  else if((dst[1] < dst[2] || tower[2].hastarget())
 				  && !tower[1].hastarget()) {
 			
 			tower[1].setTarget(mouse.getPosition(window).x,
 							   mouse.getPosition(window).y);
-			bullet[1].setSize(sf::Vector2f(1, 1));
-			bullet[1].setOrigin(1, 0);
-			bullet[1].setRotation(0);
-			bullet[1].rotate(angle(sf::Vector2f(bullet[1].getPosition()),
-								   sf::Vector2f(mouse.getPosition(window).x,
-												mouse.getPosition(window).y)));
-			
+			bullet[1].setRadius(0);
+			bullet[1].setAngle(angle(bullet[1].getPosition(),
+									 sf::Vector2f(tower[1].getTarget())));
 		  }
 		  else if(!tower[2].hastarget()) {
 			
 			tower[2].setTarget(mouse.getPosition(window).x,
 							   mouse.getPosition(window).y);
-			bullet[2].setSize(sf::Vector2f(1, 1));
-			bullet[2].setOrigin(1, 0);
-			bullet[2].setRotation(0);
-			bullet[2].rotate(angle(sf::Vector2f(bullet[2].getPosition()),
-										sf::Vector2f(mouse.getPosition(window).x,
-													 mouse.getPosition(window).y)));
+			bullet[2].setRadius(0);
+			bullet[2].setAngle(angle(bullet[2].getPosition(),
+									 sf::Vector2f(tower[2].getTarget())));
 		  }
 		  
 		  
@@ -167,18 +163,19 @@ int main(void) {
 		window.draw(target.getline1());
 		window.draw(target.getline2());
 
-		if(bullet[i].getSize().x >= distance(sf::Vector2f(tower[i].getPosition()),
+		if(bullet[i].getRadius() >= distance(sf::Vector2f(tower[i].getPosition()),
 											 sf::Vector2f(tower[i].getTarget()))) {
 		  explosions.push_back(Explosion(target.getPosition().x,
 										 target.getPosition().y));
 		  tower[i].removeTarget();
 		}
 		else {
-		
-		  bullet[i].setSize(sf::Vector2f(bullet[i].getSize().x+1.5, 1));
-		  bullet[i].setOrigin(bullet[i].getSize().x, 0);
 		  
-		  window.draw(bullet[i]);
+		  bullet[i].setRadius(bullet[i].getRadius()+1.5);
+		  bullet[i].setPoint2(polarToCart(bullet[i].getAngle(),
+										  bullet[i].getRadius()));
+		  
+		  window.draw(bullet[i].getSkin());
 		}
 		
 	  }
