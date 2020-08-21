@@ -47,3 +47,7 @@ sf::VertexArray Cursor::getline1() {
 sf::VertexArray Cursor::getline2() {
   return line2;
 }
+
+sf::Vector2f Cursor::getPosition() {
+  return sf::Vector2f(x, y);
+}

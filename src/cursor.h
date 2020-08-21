@@ -17,6 +17,7 @@ class Cursor {
 
   void setPosition(float tx, float ty);
   void setColor(sf::Color color);
+  sf::Vector2f getPosition();
   sf::VertexArray getline1();
   sf::VertexArray getline2();
 };
