@@ -16,6 +16,7 @@ class Explosion {
 
   void grow(float amount);
   float getSize();
+  sf::Vector2f getPosition();
   sf::CircleShape getSkin();
 };
 

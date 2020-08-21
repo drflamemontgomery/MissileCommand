@@ -32,6 +32,10 @@ float Explosion::getSize() {
   return radius;
 }
 
+sf::Vector2f Explosion::getPosition() {
+  return sf::Vector2f(x, y);
+}
+
 sf::CircleShape Explosion::getSkin() {
   return skin;
 }
