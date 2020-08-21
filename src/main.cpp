@@ -23,8 +23,7 @@ float angle(sf::Vector2f point1, sf::Vector2f point2) {
   float adjacent = point1.x - point2.x;
   float opposite = point1.y - point2.y;
 
-  std::cout << "angle: "<< atan2(opposite, adjacent) << std::endl;
-  return atan2(opposite, adjacent);// * 180/3.14159265);
+    return atan2(opposite, adjacent);// * 180/3.14159265);
 }
 
 sf::Vector2f polarToCart(float angle, float radius) {
@@ -64,11 +63,16 @@ int main(void) {
   ground[1].color = sf::Color(255, 255, 255);
 
   Bullet bullet[3];
-  bullet[0].setPosition(56, 538);
-  bullet[1].setPosition(400, 538);
-  bullet[2].setPosition(744, 538);
+  bullet[0].setStart(56, 538);
+  bullet[1].setStart(400, 538);
+  bullet[2].setStart(744, 538);
 
   std::vector<Explosion> explosions;
+  std::vector<Bullet> enemies;
+
+  sf::Clock clock;
+  float time = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+  time += 2;
   
   while(window.isOpen()) {
 	sf::Event event;
@@ -95,13 +99,13 @@ int main(void) {
 	  if(event.type == sf::Event::MouseButtonReleased) {
 		if(event.mouseButton.button == sf::Mouse::Left) {
 		  float dst[3];
-		  dst[0] = distance(bullet[0].getPosition(),
+		  dst[0] = distance(bullet[0].getStart(),
 							sf::Vector2f(mouse.getPosition(window).x,
 										 mouse.getPosition(window).y));
-		  dst[1] = distance(bullet[1].getPosition(),
+		  dst[1] = distance(bullet[1].getStart(),
 							sf::Vector2f(mouse.getPosition(window).x,
 										 mouse.getPosition(window).y));
-		  dst[2] = distance(bullet[2].getPosition(),
+		  dst[2] = distance(bullet[2].getStart(),
 							sf::Vector2f(mouse.getPosition(window).x,
 										 mouse.getPosition(window).y));
 		  
@@ -112,7 +116,7 @@ int main(void) {
 			tower[0].setTarget(mouse.getPosition(window).x,
 							   mouse.getPosition(window).y);
 			bullet[0].setRadius(0);
-			bullet[0].setAngle(angle(bullet[0].getPosition(),
+			bullet[0].setAngle(angle(bullet[0].getStart(),
 									 sf::Vector2f(tower[0].getTarget())));
 		    
 		  }
@@ -122,7 +126,7 @@ int main(void) {
 			tower[1].setTarget(mouse.getPosition(window).x,
 							   mouse.getPosition(window).y);
 			bullet[1].setRadius(0);
-			bullet[1].setAngle(angle(bullet[1].getPosition(),
+			bullet[1].setAngle(angle(bullet[1].getStart(),
 									 sf::Vector2f(tower[1].getTarget())));
 		  }
 		  else if(!tower[2].hastarget()) {
@@ -130,7 +134,7 @@ int main(void) {
 			tower[2].setTarget(mouse.getPosition(window).x,
 							   mouse.getPosition(window).y);
 			bullet[2].setRadius(0);
-			bullet[2].setAngle(angle(bullet[2].getPosition(),
+			bullet[2].setAngle(angle(bullet[2].getStart(),
 									 sf::Vector2f(tower[2].getTarget())));
 		  }
 		  
@@ -139,7 +143,19 @@ int main(void) {
 	  }
 	}
 
-	
+	if(clock.getElapsedTime().asSeconds() >= time) {
+	  time = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+	  time += 2;
+
+	  enemies.push_back(Bullet(rand() % 800, 0, sf::Color(255, 0, 0)));
+	  int towerTarget = rand() % 3;
+	  enemies.back().setRadius(0);
+	  sf::Vector2f vecTarget(tower[towerTarget].getPosition());
+	  vecTarget.x += rand() % 32;
+	  enemies.back().setAngle(angle(enemies.back().getStart(),
+									vecTarget));
+	  clock.restart();
+	}
 	
 	window.clear();
 
@@ -172,10 +188,10 @@ int main(void) {
 		else {
 		  
 		  bullet[i].setRadius(bullet[i].getRadius()+1.5);
-		  bullet[i].setPoint2(polarToCart(bullet[i].getAngle(),
-										  bullet[i].getRadius()));
+		  bullet[i].setEnd(polarToCart(bullet[i].getAngle(),
+									   bullet[i].getRadius()));
 		  
-		  window.draw(bullet[i].getSkin());
+		  window.draw(bullet[i].getLine());
 		}
 		
 	  }
@@ -184,10 +200,33 @@ int main(void) {
 	for(int i = 0; i < explosions.size(); i++) {
 	  window.draw(explosions.at(i).getSkin());
 	  if(explosions.at(i).getSize() < 20) {
-		explosions.at(i).grow(0.1f);
+		explosions.at(i).grow(0.15f);
+		for(int j = 0; j < enemies.size(); j++) {
+		  sf::Vector2f explosionVec = explosions.at(i).getPosition();
+		  explosionVec.x += explosions.at(i).getSize();
+		  //explosionVec.y += explosions.at(i).getSize();
+		  if(distance(enemies.at(j).getEnd(),
+					  explosionVec) <= (explosions.at(i).getSize() + 0.5f)) {
+			enemies.erase(enemies.begin() + j);
+		  }
+			 
+		}
 	  }
 	  else {
 		explosions.erase(explosions.begin() + i);
+	  }
+	}
+
+	for(int i = 0; i < enemies.size(); i++) {
+	  if(enemies.at(i).getEnd().y > tower[0].getPosition().y) {
+		enemies.erase(enemies.begin() + i);
+	  }
+	  else {
+		enemies.at(i).setRadius(enemies.at(i).getRadius()+0.5);
+		enemies.at(i).setEnd(polarToCart(enemies.at(i).getAngle(),
+										 enemies.at(i).getRadius()));
+
+		window.draw(enemies.at(i).getLine());
 	  }
 	}
 	
