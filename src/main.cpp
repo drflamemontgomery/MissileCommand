@@ -2,16 +2,17 @@
 #include <iostream>
 #include <string>
 #include <math.h>
+#include <vector>
 #include "tower.h"
 #include "cursor.h"
-
+#include "explosion.h"
 
 void explode(sf::RenderWindow* window) {
   
 }
 
 float distance(sf::Vector2f point1, sf::Vector2f point2) {
-  float a = abs(point1.x - point2.x);
+  float a = abs(point1.x - point2.x + 16);
   float b = abs(point1.y - point2.y);
 
   return sqrt(a * a + b * b);
@@ -20,12 +21,6 @@ float distance(sf::Vector2f point1, sf::Vector2f point2) {
 float angle(sf::Vector2f point1, sf::Vector2f point2) {
   float adjacent = point1.x - point2.x;
   float opposite = point1.y - point2.y;
-
-  std::cout << "point1 (" << point1.x << ", " << point1.y << ")" << std::endl;
-  std::cout << "point2 (" << point2.x << ", " << point2.y << ")" << std::endl;
-  std::cout << "o " << opposite << std::endl;
-  std::cout << "a " << adjacent << std::endl;
-  std::cout << "atan " << atan(opposite/adjacent) << std::endl;
   
   return (atan2(opposite, adjacent) * 180/3.14159265);
 }
@@ -35,26 +30,6 @@ int main(void) {
   window.setMouseCursorVisible(false);
 
   sf::Mouse mouse;
-  
-  /*sf::Texture cursorSkin;
-  if(!cursorSkin.loadFromFile("src/assets/cursor.png"))
-	return 2;
-  
-  sf::Sprite cursor;
-  cursor.setTexture(cursorSkin);
-  cursor.setPosition(10, 10);*/
-
-
-  //cursor original
-  
-  /*sf::RectangleShape cursor[2];
-  cursor[0].setSize(sf::Vector2f(11, 1));
-  cursor[0].setOrigin(6,0);
-  cursor[0].rotate(45);
-  
-  cursor[1].setSize(sf::Vector2f(11, 1));
-  cursor[1].rotate(135);
-  cursor[1].setOrigin(5, 0);*/
 
   Cursor cursor;
 
@@ -86,6 +61,8 @@ int main(void) {
   for(int i = 0; i < 3; i++) {
 	bullet[i].setOutlineColor(sf::Color(255, 255, 255));
   }
+
+  std::vector<Explosion> explosions;
   
   while(window.isOpen()) {
 	sf::Event event;
@@ -192,17 +169,31 @@ int main(void) {
 
 		if(bullet[i].getSize().x >= distance(sf::Vector2f(tower[i].getPosition()),
 											 sf::Vector2f(tower[i].getTarget()))) {
-		  //explosion
+		  explosions.push_back(Explosion(target.getPosition().x,
+										 target.getPosition().y));
 		  tower[i].removeTarget();
 		}
+		else {
 		
-		bullet[i].setSize(sf::Vector2f(bullet[i].getSize().x+1.5, 1));
-		bullet[i].setOrigin(bullet[i].getSize().x, 0);
-
-		window.draw(bullet[i]);
+		  bullet[i].setSize(sf::Vector2f(bullet[i].getSize().x+1.5, 1));
+		  bullet[i].setOrigin(bullet[i].getSize().x, 0);
+		  
+		  window.draw(bullet[i]);
+		}
 		
 	  }
 	}
+
+	for(int i = 0; i < explosions.size(); i++) {
+	  window.draw(explosions.at(i).getSkin());
+	  if(explosions.at(i).getSize() < 20) {
+		explosions.at(i).grow(0.1f);
+	  }
+	  else {
+		explosions.erase(explosions.begin() + i);
+	  }
+	}
+	
 	window.display();
   }
   
