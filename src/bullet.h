@@ -9,21 +9,21 @@ class Bullet
  private:
   float radius;
   float angle;
-  sf::VertexArray lines;
+  sf::VertexArray line;
  public:
   Bullet();
   Bullet(float tx, float ty, sf::Color color);
 
   void setAngle(float radians);
-  void setPosition(float tx, float ty);
+  void setStart(float tx, float ty);
   void setColor(sf::Color color);
   void setRadius(float size);
-  void setPoint2(sf::Vector2f point);
+  void setEnd(sf::Vector2f point);
   float getRadius();
   float getAngle();
-  sf::Vector2f getPoint2();
-  sf::Vector2f getPosition();
-  sf::VertexArray getSkin();
+  sf::Vector2f getEnd();
+  sf::Vector2f getStart();
+  sf::VertexArray getLine();
   
 };
 
