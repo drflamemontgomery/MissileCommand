@@ -1,6 +1,7 @@
 #include "explosion.h"
 
 Explosion::Explosion(float tx, float ty) {
+  harmful = false;
   x = tx;
   y = ty;
 
@@ -12,6 +13,7 @@ Explosion::Explosion(float tx, float ty) {
 }
 
 Explosion::Explosion(float tx, float ty, sf::Color color) {
+  harmful = false;
   x = tx;
   y = ty;
 
@@ -30,6 +32,10 @@ void Explosion::grow(float amount) {
 
 float Explosion::getSize() {
   return radius;
+}
+
+bool Explosion::canHarm() {
+  return harmful;
 }
 
 sf::Vector2f Explosion::getPosition() {

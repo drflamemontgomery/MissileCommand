@@ -11,11 +11,14 @@ class Explosion {
   float radius;
   sf::CircleShape skin;
  public:
+  bool harmful;
+  
   Explosion(float tx, float ty);
   Explosion(float tx, float ty, sf::Color);
 
   void grow(float amount);
   float getSize();
+  bool canHarm();
   sf::Vector2f getPosition();
   sf::CircleShape getSkin();
 };
