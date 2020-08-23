@@ -18,6 +18,10 @@ Tower::Tower(int tx, int ty) {
   sprite.setPosition(x, y);
 }
 
+void Tower::kill() {
+  dead = true;
+}
+
 void Tower::setPosition(int tx, int ty) {
   x = tx;
   y = ty;
@@ -54,5 +58,12 @@ void Tower::removeTarget() {
 }
 
 bool Tower::hastarget() {
+  if(dead) {
+	return true;
+  }
   return hasTarget;
+}
+
+bool Tower::isDead() {
+  return dead;
 }
