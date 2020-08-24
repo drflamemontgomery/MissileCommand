@@ -4,11 +4,11 @@ Bullet::Bullet() {
   line = sf::VertexArray(sf::LineStrip, 2);
   
   setStart(0, 0);
-  setColor(sf::Color(255, 255, 255));
+  setColor(sf::Color(44, 139, 197));
   radius = 0;
 }
 
-Bullet::Bullet(float tx, float ty, sf::Color color = sf::Color(255, 255, 255)) {
+Bullet::Bullet(float tx, float ty, sf::Color color = sf::Color(44, 139, 197)) {
   line = sf::VertexArray(sf::LineStrip, 2);
   setStart(tx, ty);
   setColor(color);
@@ -25,7 +25,7 @@ void Bullet::setStart(float tx, float ty) {
 
 void Bullet::setColor(sf::Color color) {
   line[0].color = color;
-  line[0].color = color;
+  line[1].color = color;
 }
 
 void Bullet::setRadius(float size) {

@@ -9,7 +9,7 @@ Explosion::Explosion(float tx, float ty) {
 
   skin.setPosition(x-radius, y-radius);
   skin.setRadius(radius);
-  skin.setFillColor(sf::Color(255, 0, 0));
+  skin.setFillColor(sf::Color(44, 139, 197));
 }
 
 Explosion::Explosion(float tx, float ty, sf::Color color) {
