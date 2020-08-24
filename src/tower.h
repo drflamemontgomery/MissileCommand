@@ -18,6 +18,7 @@ class Tower
   Tower();
   Tower(int tx, int ty);
 
+  void reset();
   void kill();
   void setPosition(int tx, int ty);
   sf::Vector2i getPosition();

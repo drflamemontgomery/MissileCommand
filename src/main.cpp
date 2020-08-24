@@ -12,6 +12,7 @@
 #include "cursor.h"
 #include "explosion.h"
 #include "bullet.h"
+#include "house.h"
 
 float distance(sf::Vector2f point1, sf::Vector2f point2) {
   float a = abs(point1.x - point2.x + 16);
@@ -52,6 +53,23 @@ int main(void) {
   tower[0].setPosition(40, 540);
   tower[1].setPosition(384, 540);
   tower[2].setPosition(728, 540);
+
+  House house[14];
+  house[0].setPosition(83, 546);
+  house[1].setPosition(126, 546);
+  house[2].setPosition(169, 546);
+  house[3].setPosition(212, 546);
+  house[4].setPosition(255, 546);
+  house[5].setPosition(298, 546);
+  house[6].setPosition(341, 546);
+  house[7].setPosition(427, 546);
+  house[8].setPosition(470, 546);
+  house[9].setPosition(513, 546);
+  house[10].setPosition(556, 546);
+  house[11].setPosition(599, 546);
+  house[12].setPosition(642, 546);
+  house[13].setPosition(685, 546);
+  
   
   /*sf::Vertex ground[2];
   ground[0].position = sf::Vector2f(0, 541);
@@ -167,10 +185,8 @@ int main(void) {
 		time += 2;
 
 		enemies.push_back(Bullet(rand() % 800, 0, sf::Color(255, 0, 0)));
-		int towerTarget = rand() % 3;
-		enemies.back().setRadius(0);
-		sf::Vector2f vecTarget(tower[towerTarget].getPosition());
-		vecTarget.x += rand() % 112 - 40;
+		sf::Vector2f vecTarget(rand() % 800, 540);
+		enemies.back().setRadius(0);;
 		enemies.back().setAngle(angle(enemies.back().getStart(),
 									  vecTarget));
 		clock.restart();
@@ -186,6 +202,12 @@ int main(void) {
 		}
 	  }
 
+	  for(int i = 0; i < sizeof(house)/sizeof(house[0]); i++) {
+		if(!house[i].isDead()) {
+		  window.draw(house[i].getSprite());
+		}
+	  }
+	  
 	  /*window.draw(cursor[0]);
 		window.draw(cursor[1]);*/
 	  sf::VertexArray cursorRender1 = cursor.getline1();
@@ -241,24 +263,67 @@ int main(void) {
 			  score += 20;
 			  displayScore.setString(std::to_string(score));
 			  tower[j].kill();
-			  if(tower[(j+1)%(sizeof(tower)/sizeof(tower[0]))].isDead() &&
-				   tower[(j+2)%(sizeof(tower)/sizeof(tower[0]))].isDead() &&
-				   tower[(j)%(sizeof(tower)/sizeof(tower[0]))].isDead()) {
-				std::cout << "(" << tower[0].isDead() << ", "
-						  << tower[1].isDead() << ", "
-						  << tower[2].isDead() << ")" << std::endl;
-				playing = false;
+			  if(tower[0].isDead() &&
+				 tower[1].isDead() &&
+				 tower[2].isDead()) {
+				for(int otherj = 0; otherj < sizeof(house)/sizeof(house[0]);
+					otherj++) {
+				  if(!house[otherj].isDead()) {
+					break;
+				  }
+				  else if(otherj == (sizeof(house)/sizeof(house[0])-1)) {
+					playing = false;
+				  }
+				}
 			  }
 		  
 			}
-			else {
-			  enemies.at(i).setRadius(enemies.at(i).getRadius()+0.5);
-			  enemies.at(i).setEnd(polarToCart(enemies.at(i).getAngle(),
-											   enemies.at(i).getRadius()));
-		  
-			  window.draw(enemies.at(i).getLine());
+		  }
+
+		  for(int j = 0; j < sizeof(house)/sizeof(house[0]); j++) {
+			if(enemies.at(i).getEnd().y >= 564) {
+			  Explosion enemyDied(enemies.at(i).getEnd().x,
+								  enemies.at(i).getEnd().y,
+								  sf::Color(255, 32, 0));
+			  enemyDied.harmful = true;
+			  explosions.push_back(enemyDied);
+			  enemies.erase(enemies.begin() + i);
+			  score += 20;
+			  displayScore.setString(std::to_string(score));
+			}
+			else if(enemies.at(i).getEnd().x >= house[j].getPosition().x
+					&& enemies.at(i).getEnd().x <= house[j].getPosition().x + 32
+					&& !house[j].isDead()) {
+			  explosions.push_back(Explosion(enemies.at(i).getEnd().x,
+											 enemies.at(i).getEnd().y,
+											 sf::Color(255, 32, 0)));
+			  enemies.erase(enemies.begin() + i);
+			  score += 20;
+			  displayScore.setString(std::to_string(score));
+			  house[j].kill();
+			  if(tower[0].isDead() &&
+				 tower[1].isDead() &&
+				 tower[2].isDead()) {
+				for(int otherj = 0; otherj < sizeof(house)/sizeof(house[0]);
+					otherj++) {
+				  if(!house[otherj].isDead()) {
+					break;
+				  }
+				  else if(otherj == (sizeof(house)/sizeof(house[0])-1)) {
+					playing = false;
+				  }
+				}
+			  }
+			  
 			}
 		  }
+		  
+		  enemies.at(i).setRadius(enemies.at(i).getRadius()+0.5);
+		  enemies.at(i).setEnd(polarToCart(enemies.at(i).getAngle(),
+										   enemies.at(i).getRadius()));
+		  
+		  window.draw(enemies.at(i).getLine());
+		  
 		}
 		else {
 		  enemies.at(i).setRadius(enemies.at(i).getRadius()+0.5);
@@ -291,38 +356,83 @@ int main(void) {
 			}
 			 
 		  }
-		  for(int j = 0; j < sizeof(tower)/sizeof(tower[0]); j++) {
+		  for(int j = 0; j < sizeof(house)/sizeof(house[0]); j++) {
 			if(explosions.at(i).harmful &&
-			   explosions.at(i).getPosition().y >= tower[j].getPosition().y - 20
-			   && !tower[j].isDead()) {
+			   explosions.at(i).getPosition().y >= house[j].getPosition().y - 20
+			   && !house[j].isDead()) {
 			  float testX = explosions.at(i).getPosition().x;
 			  float testY = explosions.at(i).getPosition().y;
 			  if(explosions.at(i).getPosition().x <=
-				 tower[j].getPosition().x)
-				testX = tower[j].getPosition().x;
+				 house[j].getPosition().x)
+				testX = house[j].getPosition().x;
 			  else if(explosions.at(i).getPosition().x >=
-					  tower[j].getPosition().x + 32)
-				testX = tower[j].getPosition().x + 32;
+					  house[j].getPosition().x + 32)
+				testX = house[j].getPosition().x + 32;
 			  if(explosions.at(i).getPosition().y
-				 <= tower[j].getPosition().y)
-				testY = tower[j].getPosition().y;
+				 <= house[j].getPosition().y)
+				testY = house[j].getPosition().y;
 
 			  float distX = explosions.at(i).getPosition().x - testX;
 			  float distY = testY - explosions.at(i).getPosition().y;
 			  float dist = sqrt( (distX*distX) + (distY*distY) );
 
 			  if(dist <= explosions.at(i).getSize())
-				tower[j].kill();
-				if(tower[(j+1)%(sizeof(tower)/sizeof(tower[0]))].isDead() &&
-				   tower[(j+2)%(sizeof(tower)/sizeof(tower[0]))].isDead() &&
-				   tower[(j)%(sizeof(tower)/sizeof(tower[0]))].isDead()) {
-				  std::cout << "(" << tower[0].isDead() << ", "
-							<< tower[1].isDead() << ", "
-							<< tower[2].isDead() << ")" << std::endl;
-				  playing = false;
+				house[j].kill();
+				if(tower[0].isDead() &&
+				   tower[1].isDead() &&
+				   tower[2].isDead()) {
+				  for(int otherj = 0; otherj < sizeof(house)/sizeof(house[0]);
+					  otherj++) {
+					if(!house[otherj].isDead()) {
+					  break;
+					}
+					else if(otherj == (sizeof(house)/sizeof(house[0])-1)) {
+					  playing = false;
+					}
+				  }
 				}
 
 			
+			}
+			for(int j = 0; j < sizeof(tower)/sizeof(tower[0]); j++) {
+			  if(explosions.at(i).harmful &&
+				 explosions.at(i).getPosition().y >= tower[j].getPosition().y - 20
+				 && !tower[j].isDead()) {
+				float testX = explosions.at(i).getPosition().x;
+				float testY = explosions.at(i).getPosition().y;
+				if(explosions.at(i).getPosition().x <=
+				   tower[j].getPosition().x)
+				  testX = tower[j].getPosition().x;
+				else if(explosions.at(i).getPosition().x >=
+						tower[j].getPosition().x + 32)
+				  testX = tower[j].getPosition().x + 32;
+				if(explosions.at(i).getPosition().y
+				   <= tower[j].getPosition().y)
+				  testY = tower[j].getPosition().y;
+
+				float distX = explosions.at(i).getPosition().x - testX;
+				float distY = testY - explosions.at(i).getPosition().y;
+				float dist = sqrt( (distX*distX) + (distY*distY) );
+
+				if(dist <= explosions.at(i).getSize()) {
+				  tower[j].kill();
+				  if(tower[0].isDead() &&
+					 tower[1].isDead() &&
+					 tower[2].isDead()) {
+					for(int otherj = 0; otherj < sizeof(house)/sizeof(house[0]);
+						otherj++) {
+					  if(!house[otherj].isDead()) {
+						break;
+					  }
+					  else if(otherj == (sizeof(house)/sizeof(house[0])-1)) {
+						playing = false;
+					  }
+					}
+				  }
+				}
+			  
+				
+			  }
 			}
 		  }
 		}

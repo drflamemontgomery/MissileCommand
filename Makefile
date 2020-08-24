@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-lsfml-graphics -lsfml-window -lsfml-system -lX11
-SRCS=src/main.cpp src/tower.cpp src/cursor.cpp src/explosion.cpp src/bullet.cpp
-HEADERS=src/tower.h src/cursor.h src/explosion.h src/bullet.h
+SRCS=src/main.cpp src/tower.cpp src/cursor.cpp src/explosion.cpp src/bullet.cpp src/house.cpp
+HEADERS=src/tower.h src/cursor.h src/explosion.h src/bullet.h src/house.h
 EXEDIR=bin
 OUTFILE=main
 
