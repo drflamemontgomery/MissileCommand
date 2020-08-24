@@ -76,225 +76,276 @@ int main(void) {
   sf::Clock clock;
   float time = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
   time += 2;
+  bool playing = true;
+  int score = 0;
+
+  sf::Font gamefont;
+
+  if(!gamefont.loadFromFile("src/assets/yoster.ttf"))
+	std::cout << "Font Failed to Load" << std::endl;
+
+  sf::Text displayScore;
+  displayScore.setFont(gamefont);
+  displayScore.setCharacterSize(30);
+  displayScore.setFillColor(sf::Color(255, 255, 255));
+  displayScore.setPosition(400, 40);
+  displayScore.setString(std::to_string(score));
   
   while(window.isOpen()) {
 	sf::Event event;
-
-	int mouseX = mouse.getPosition(window).x;
-	int mouseY = mouse.getPosition(window).y;
-
-
-	// cursor original
 	
-	/*cursor[0].setPosition(mouseX, mouseY);
-	  cursor[1].setPosition(mouseX, mouseY);*/
-	cursor.setPosition(mouseX, mouseY);
+	while(playing) {
 
-	if(window.getSize() != sf::Vector2u(800, 600)) {
-	  window.setSize(sf::Vector2u(800, 600));
-	}
+	  int mouseX = mouse.getPosition(window).x;
+	  int mouseY = mouse.getPosition(window).y;
+
+
+	  // cursor original
 	
-	while(window.pollEvent(event)) {
-	  if(event.type == sf::Event::Closed) {
-		window.close();
+	  /*cursor[0].setPosition(mouseX, mouseY);
+		cursor[1].setPosition(mouseX, mouseY);*/
+	  cursor.setPosition(mouseX, mouseY);
+
+	  if(window.getSize() != sf::Vector2u(800, 600)) {
+		window.setSize(sf::Vector2u(800, 600));
 	  }
+	
+	  while(window.pollEvent(event)) {
+		if(event.type == sf::Event::Closed) {
+		  window.close();
+		}
 	  
-	  if(event.type == sf::Event::MouseButtonReleased) {
-		if(event.mouseButton.button == sf::Mouse::Left) {
-		  float dst[3];
-		  dst[0] = distance(bullet[0].getStart(),
-							sf::Vector2f(mouse.getPosition(window).x,
-										 mouse.getPosition(window).y));
-		  dst[1] = distance(bullet[1].getStart(),
-							sf::Vector2f(mouse.getPosition(window).x,
-										 mouse.getPosition(window).y));
-		  dst[2] = distance(bullet[2].getStart(),
-							sf::Vector2f(mouse.getPosition(window).x,
-										 mouse.getPosition(window).y));
+		if(event.type == sf::Event::MouseButtonReleased) {
+		  if(event.mouseButton.button == sf::Mouse::Left) {
+			float dst[3];
+			dst[0] = distance(bullet[0].getStart(),
+							  sf::Vector2f(mouse.getPosition(window).x,
+										   mouse.getPosition(window).y));
+			dst[1] = distance(bullet[1].getStart(),
+							  sf::Vector2f(mouse.getPosition(window).x,
+										   mouse.getPosition(window).y));
+			dst[2] = distance(bullet[2].getStart(),
+							  sf::Vector2f(mouse.getPosition(window).x,
+										   mouse.getPosition(window).y));
 		  
-		  if((dst[0] < dst[1] || tower[1].hastarget())
-			 && (dst[0] < dst[2] || tower[2].hastarget())
-			 && !tower[0].hastarget()) {
+			if((dst[0] < dst[1] || tower[1].hastarget())
+			   && (dst[0] < dst[2] || tower[2].hastarget())
+			   && !tower[0].hastarget()) {
 			
-			tower[0].setTarget(mouse.getPosition(window).x,
-							   mouse.getPosition(window).y);
-			bullet[0].setRadius(0);
-			bullet[0].setAngle(angle(bullet[0].getStart(),
-									 sf::Vector2f(tower[0].getTarget())));
+			  tower[0].setTarget(mouse.getPosition(window).x,
+								 mouse.getPosition(window).y);
+			  bullet[0].setRadius(0);
+			  bullet[0].setAngle(angle(bullet[0].getStart(),
+									   sf::Vector2f(tower[0].getTarget())));
 		    
-		  }
-		  else if((dst[1] < dst[2] || tower[2].hastarget())
-				  && !tower[1].hastarget()) {
+			}
+			else if((dst[1] < dst[2] || tower[2].hastarget())
+					&& !tower[1].hastarget()) {
 			
-			tower[1].setTarget(mouse.getPosition(window).x,
-							   mouse.getPosition(window).y);
-			bullet[1].setRadius(0);
-			bullet[1].setAngle(angle(bullet[1].getStart(),
-									 sf::Vector2f(tower[1].getTarget())));
-		  }
-		  else if(!tower[2].hastarget()) {
+			  tower[1].setTarget(mouse.getPosition(window).x,
+								 mouse.getPosition(window).y);
+			  bullet[1].setRadius(0);
+			  bullet[1].setAngle(angle(bullet[1].getStart(),
+									   sf::Vector2f(tower[1].getTarget())));
+			}
+			else if(!tower[2].hastarget()) {
 			
-			tower[2].setTarget(mouse.getPosition(window).x,
-							   mouse.getPosition(window).y);
-			bullet[2].setRadius(0);
-			bullet[2].setAngle(angle(bullet[2].getStart(),
-									 sf::Vector2f(tower[2].getTarget())));
+			  tower[2].setTarget(mouse.getPosition(window).x,
+								 mouse.getPosition(window).y);
+			  bullet[2].setRadius(0);
+			  bullet[2].setAngle(angle(bullet[2].getStart(),
+									   sf::Vector2f(tower[2].getTarget())));
+			}
+		  
+		  
 		  }
-		  
-		  
 		}
 	  }
-	}
 
-	if(clock.getElapsedTime().asSeconds() >= time) {
-	  time = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-	  time += 2;
+	  if(clock.getElapsedTime().asSeconds() >= time) {
+		time = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		time += 2;
 
-	  enemies.push_back(Bullet(rand() % 800, 0, sf::Color(255, 0, 0)));
-	  int towerTarget = rand() % 3;
-	  enemies.back().setRadius(0);
-	  sf::Vector2f vecTarget(tower[towerTarget].getPosition());
-	  vecTarget.x += rand() % 112 - 40;
-	  enemies.back().setAngle(angle(enemies.back().getStart(),
-									vecTarget));
-	  clock.restart();
-	}
+		enemies.push_back(Bullet(rand() % 800, 0, sf::Color(255, 0, 0)));
+		int towerTarget = rand() % 3;
+		enemies.back().setRadius(0);
+		sf::Vector2f vecTarget(tower[towerTarget].getPosition());
+		vecTarget.x += rand() % 112 - 40;
+		enemies.back().setAngle(angle(enemies.back().getStart(),
+									  vecTarget));
+		clock.restart();
+	  }
 	
-	window.clear();
+	  window.clear();
 
-	window.draw(ground);
+	  window.draw(ground);
 
-	for(int i = 0; i < sizeof(tower)/sizeof(tower[0]); i++) {
-	  if(!tower[i].isDead()) {
-		window.draw(tower[i].getSprite());
+	  for(int i = 0; i < sizeof(tower)/sizeof(tower[0]); i++) {
+		if(!tower[i].isDead()) {
+		  window.draw(tower[i].getSprite());
+		}
 	  }
-	}
 
-	/*window.draw(cursor[0]);
-	  window.draw(cursor[1]);*/
-	sf::VertexArray cursorRender1 = cursor.getline1();
-	sf::VertexArray cursorRender2 = cursor.getline2();
-	window.draw(cursorRender1);
-	window.draw(cursorRender2);
+	  /*window.draw(cursor[0]);
+		window.draw(cursor[1]);*/
+	  sf::VertexArray cursorRender1 = cursor.getline1();
+	  sf::VertexArray cursorRender2 = cursor.getline2();
+	  window.draw(cursorRender1);
+	  window.draw(cursorRender2);
 	
-	for(int i = 0; i < (sizeof(tower)/sizeof(tower[0])); i++) {
-	  if(tower[i].hastarget() && !tower[i].isDead()) {
-		target.setPosition(tower[i].getTarget().x,
-						   tower[i].getTarget().y);
-		window.draw(target.getline1());
-		window.draw(target.getline2());
+	  for(int i = 0; i < (sizeof(tower)/sizeof(tower[0])); i++) {
+		if(tower[i].hastarget() && !tower[i].isDead()) {
+		  target.setPosition(tower[i].getTarget().x,
+							 tower[i].getTarget().y);
+		  window.draw(target.getline1());
+		  window.draw(target.getline2());
 
-		if(bullet[i].getRadius() >= distance(sf::Vector2f(tower[i].getPosition()),
-											 sf::Vector2f(tower[i].getTarget()))) {
-		  explosions.push_back(Explosion(target.getPosition().x,
-										 target.getPosition().y));
-		  tower[i].removeTarget();
-		}
-		else {
-		  
-		  bullet[i].setRadius(bullet[i].getRadius()+1.5);
-		  bullet[i].setEnd(polarToCart(bullet[i].getAngle(),
-									   bullet[i].getRadius()));
-		  
-		  window.draw(bullet[i].getLine());
-		}
-		
-	  }
-	}
-
-	for(int i = 0; i < enemies.size(); i++) {
-	  if(enemies.at(i).getEnd().y >= tower[0].getPosition().y) {
-		for(int j = 0; j < sizeof(tower)/sizeof(tower[0]); j++) {
-		  if(enemies.at(i).getEnd().y >= 564) {
-			Explosion enemyDied(enemies.at(i).getEnd().x,
-								enemies.at(i).getEnd().y,
-								sf::Color(255, 32, 0));
-			enemyDied.harmful = true;
-			explosions.push_back(enemyDied);
-			enemies.erase(enemies.begin() + i);
-		  }
-		  else if(enemies.at(i).getEnd().x >= tower[j].getPosition().x
-				  && enemies.at(i).getEnd().x <= tower[j].getPosition().x + 32
-				  && !tower[j].isDead()) {
-			explosions.push_back(Explosion(enemies.at(i).getEnd().x,
-										   enemies.at(i).getEnd().y,
-										   sf::Color(255, 32, 0)));
-			enemies.erase(enemies.begin() + i);
-			tower[j].kill();
-		  
+		  if(bullet[i].getRadius() >= distance(sf::Vector2f(tower[i].getPosition()),
+											   sf::Vector2f(tower[i].getTarget()))) {
+			explosions.push_back(Explosion(target.getPosition().x,
+										   target.getPosition().y));
+			tower[i].removeTarget();
 		  }
 		  else {
-			enemies.at(i).setRadius(enemies.at(i).getRadius()+0.5);
-			enemies.at(i).setEnd(polarToCart(enemies.at(i).getAngle(),
-											 enemies.at(i).getRadius()));
 		  
-			window.draw(enemies.at(i).getLine());
+			bullet[i].setRadius(bullet[i].getRadius()+1.5);
+			bullet[i].setEnd(polarToCart(bullet[i].getAngle(),
+										 bullet[i].getRadius()));
+		  
+			window.draw(bullet[i].getLine());
 		  }
-		}
-	  }
-	  else {
-		enemies.at(i).setRadius(enemies.at(i).getRadius()+0.5);
-		enemies.at(i).setEnd(polarToCart(enemies.at(i).getAngle(),
-										 enemies.at(i).getRadius()));
 		
-		window.draw(enemies.at(i).getLine());
-	  }
-	  
-	}
-	
-	for(int i = 0; i < explosions.size(); i++) {
-	  window.draw(explosions.at(i).getSkin());
-	  if(explosions.at(i).getSize() < 20) {
-		explosions.at(i).grow(0.15f);
-		for(int j = 0; j < enemies.size(); j++) {
-		  sf::Vector2f explosionVec = explosions.at(i).getPosition();
-		  explosionVec.x += explosions.at(i).getSize();
-		  //explosionVec.y += explosions.at(i).getSize();
-		  if(distance(enemies.at(j).getEnd(),
-					  explosionVec) <= (explosions.at(i).getSize() + 0.5f)) {
-			Explosion enemyDies(enemies.at(j).getEnd().x,
-								enemies.at(j).getEnd().y,
-								sf::Color(255, 32, 0));
-			enemyDies.harmful = true;
-			explosions.push_back(enemyDies);
-			enemies.erase(enemies.begin() + j);
-		  }
-			 
 		}
-		for(int j = 0; j < sizeof(tower)/sizeof(tower[0]); j++) {
-		  if(explosions.at(i).harmful &&
-			 explosions.at(i).getPosition().y >= tower[j].getPosition().y - 20
-			 && !tower[j].isDead()) {
-			float testX = explosions.at(i).getPosition().x;
-			float testY = explosions.at(i).getPosition().y;
-			if(explosions.at(i).getPosition().x <=
-			   tower[j].getPosition().x)
-			  testX = tower[j].getPosition().x;
-			else if(explosions.at(i).getPosition().x >=
-					tower[j].getPosition().x + 32)
-			  testX = tower[j].getPosition().x + 32;
-			if(explosions.at(i).getPosition().y
-			   <= tower[j].getPosition().y)
-			  testY = tower[j].getPosition().y;
+	  }
 
-			float distX = explosions.at(i).getPosition().x - testX;
-			float distY = testY - explosions.at(i).getPosition().y;
-			float dist = sqrt( (distX*distX) + (distY*distY) );
-
-			if(dist <= explosions.at(i).getSize())
+	  for(int i = 0; i < enemies.size(); i++) {
+		if(enemies.at(i).getEnd().y >= tower[0].getPosition().y) {
+		  for(int j = 0; j < sizeof(tower)/sizeof(tower[0]); j++) {
+			if(enemies.at(i).getEnd().y >= 564) {
+			  Explosion enemyDied(enemies.at(i).getEnd().x,
+								  enemies.at(i).getEnd().y,
+								  sf::Color(255, 32, 0));
+			  enemyDied.harmful = true;
+			  explosions.push_back(enemyDied);
+			  enemies.erase(enemies.begin() + i);
+			  score += 20;
+			  displayScore.setString(std::to_string(score));
+			}
+			else if(enemies.at(i).getEnd().x >= tower[j].getPosition().x
+					&& enemies.at(i).getEnd().x <= tower[j].getPosition().x + 32
+					&& !tower[j].isDead()) {
+			  explosions.push_back(Explosion(enemies.at(i).getEnd().x,
+											 enemies.at(i).getEnd().y,
+											 sf::Color(255, 32, 0)));
+			  enemies.erase(enemies.begin() + i);
+			  score += 20;
+			  displayScore.setString(std::to_string(score));
 			  tower[j].kill();
-			
+			  if(tower[(j+1)%(sizeof(tower)/sizeof(tower[0]))].isDead() &&
+				   tower[(j+2)%(sizeof(tower)/sizeof(tower[0]))].isDead() &&
+				   tower[(j)%(sizeof(tower)/sizeof(tower[0]))].isDead()) {
+				std::cout << "(" << tower[0].isDead() << ", "
+						  << tower[1].isDead() << ", "
+						  << tower[2].isDead() << ")" << std::endl;
+				playing = false;
+			  }
+		  
+			}
+			else {
+			  enemies.at(i).setRadius(enemies.at(i).getRadius()+0.5);
+			  enemies.at(i).setEnd(polarToCart(enemies.at(i).getAngle(),
+											   enemies.at(i).getRadius()));
+		  
+			  window.draw(enemies.at(i).getLine());
+			}
 		  }
 		}
+		else {
+		  enemies.at(i).setRadius(enemies.at(i).getRadius()+0.5);
+		  enemies.at(i).setEnd(polarToCart(enemies.at(i).getAngle(),
+										   enemies.at(i).getRadius()));
+		
+		  window.draw(enemies.at(i).getLine());
+		}
+	  
 	  }
-	  else {
-		explosions.erase(explosions.begin() + i);
+	
+	  for(int i = 0; i < explosions.size(); i++) {
+		window.draw(explosions.at(i).getSkin());
+		if(explosions.at(i).getSize() < 20) {
+		  explosions.at(i).grow(0.15f);
+		  for(int j = 0; j < enemies.size(); j++) {
+			sf::Vector2f explosionVec = explosions.at(i).getPosition();
+			explosionVec.x += explosions.at(i).getSize();
+			//explosionVec.y += explosions.at(i).getSize();
+			if(distance(enemies.at(j).getEnd(),
+						explosionVec) <= (explosions.at(i).getSize() + 0.5f)) {
+			  Explosion enemyDies(enemies.at(j).getEnd().x,
+								  enemies.at(j).getEnd().y,
+								  sf::Color(255, 32, 0));
+			  enemyDies.harmful = true;
+			  explosions.push_back(enemyDies);
+			  enemies.erase(enemies.begin() + j);
+			  score += 20;
+			  displayScore.setString(std::to_string(score));
+			}
+			 
+		  }
+		  for(int j = 0; j < sizeof(tower)/sizeof(tower[0]); j++) {
+			if(explosions.at(i).harmful &&
+			   explosions.at(i).getPosition().y >= tower[j].getPosition().y - 20
+			   && !tower[j].isDead()) {
+			  float testX = explosions.at(i).getPosition().x;
+			  float testY = explosions.at(i).getPosition().y;
+			  if(explosions.at(i).getPosition().x <=
+				 tower[j].getPosition().x)
+				testX = tower[j].getPosition().x;
+			  else if(explosions.at(i).getPosition().x >=
+					  tower[j].getPosition().x + 32)
+				testX = tower[j].getPosition().x + 32;
+			  if(explosions.at(i).getPosition().y
+				 <= tower[j].getPosition().y)
+				testY = tower[j].getPosition().y;
+
+			  float distX = explosions.at(i).getPosition().x - testX;
+			  float distY = testY - explosions.at(i).getPosition().y;
+			  float dist = sqrt( (distX*distX) + (distY*distY) );
+
+			  if(dist <= explosions.at(i).getSize())
+				tower[j].kill();
+				if(tower[(j+1)%(sizeof(tower)/sizeof(tower[0]))].isDead() &&
+				   tower[(j+2)%(sizeof(tower)/sizeof(tower[0]))].isDead() &&
+				   tower[(j)%(sizeof(tower)/sizeof(tower[0]))].isDead()) {
+				  std::cout << "(" << tower[0].isDead() << ", "
+							<< tower[1].isDead() << ", "
+							<< tower[2].isDead() << ")" << std::endl;
+				  playing = false;
+				}
+
+			
+			}
+		  }
+		}
+		else {
+		  explosions.erase(explosions.begin() + i);
+		}
 	  }
-	}
 
 	
+	  window.draw(displayScore);
+	  window.display();
+	}
+
+	while(window.pollEvent(event)) {
+	  if(event.type == sf::Event::Closed)
+		  window.close();
+	}
+		  
 	
+	window.clear();
+	window.draw(displayScore);
 	window.display();
+	
   }
   
   return 0;
